@@ -33,23 +33,6 @@
 2. **Set Preferences:** Define energy usage schedules and priorities for each device.  
 3. **Monitor Insights:** View energy consumption reports and recommendations.  
 
-## Contribution  
-Contributions are welcome! To contribute:  
-1. Fork the repository.  
-2. Create a new branch:  
-   ```bash  
-   git checkout -b feature-name  
-   ```  
-3. Commit your changes:  
-   ```bash  
-   git commit -m "Add feature description"  
-   ```  
-4. Push to your fork:  
-   ```bash  
-   git push origin feature-name  
-   ```  
-5. Open a pull request.  
-
 ### Our Team✨
 <a href="https://github.com/abhayprabhakar" style="text-decoration: none"><img src="https://contrib.rocks/image?repo=abhayprabhakar/abhayprabhakar"/></a>
 <a href="https://github.com/devady" style="text-decoration: none"><img src="https://contrib.rocks/image?repo=devady/devady"/></a>
