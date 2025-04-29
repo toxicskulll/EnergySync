@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chatbot and Graphs</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    /* General body styling */
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Arial', sans-serif;
+      display: flex;
+      height: 100vh;
+      background-color: #222222;
+      overflow: hidden;
+    }
+
+    /* Wrapper for horizontal layout */
+    .container {
+      display: flex;
+      width: 100%;
+      height: 100%;
+      transition: all 0.3s ease;
+    }
+
+    /* Left side: Graphs */
+    .graphs {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background-color: #222222;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    .graph {
+      flex: 1;
+      margin: 10px 0;
+      background-color: white;
+      border: 1px solid #e1e8ed;
+      border-radius: 16px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.07);
+      transition: all 0.3s ease;
+      transform-origin: center;
+      overflow: hidden;
+    }
+
+    .graph:hover {
+      transform: scale(1.02);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Right side: Chatbot */
+    .chatbot {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background-color: #222222;
+      border-left: 1px solid #e1e8ed;
+      border-top-left-radius: 20px;
+      border-bottom-left-radius: 20px;
+      box-shadow: -4px 0 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .chatbot-header {
+      background-color: #4a90e2;
+      color: white;
+      padding: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top-left-radius: 20px;
+      transition: background-color 0.3s ease;
+    }
+
+    .chatbot-header:hover {
+      background-color: #3a7bd5;
+    }
+
+    .chatbot-header button {
+      background-color: #222222;
+      border: none;
+      border-radius: 50%;
+      width: 45px;
+      height: 45px;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: all 0.3s ease;
+    }
+
+    .chatbot-header button:hover {
+      transform: rotate(15deg) scale(1.1);
+      background-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .chatbot-header button img {
+      border-radius: 50%;
+      transition: transform 0.3s ease;
+    }
+
+    .chatbot-content {
+      flex: 1;
+      background-color: #222222;
+      display: flex;
+      flex-direction: column;
+      padding: 15px;
+      box-sizing: border-box;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: #4a90e2 #f1f5f9;
+    }
+
+    .chatbot-content::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .chatbot-content::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+
+    .chatbot-content::-webkit-scrollbar-thumb {
+      background-color: #4a90e2;
+      border-radius: 20px;
+    }
+
+    .message {
+      margin: 8px 0;
+      padding: 12px;
+      border-radius: 12px;
+      max-width: 80%;
+      animation: fadeIn 0.3s ease;
+      position: relative;
+    }
+
+    @keyframes fadeIn {
+      from { 
+        opacity: 0; 
+        transform: translateY(10px);
+      }
+      to { 
+        opacity: 1; 
+        transform: translateY(0);
+      }
+    }
+
+    .user-message {
+      background-color: #e6f3ff;
+      color: #2c3e50;
+      align-self: flex-end;
+      border-bottom-right-radius: 4px;
+    }
+
+    .bot-message {
+      background-color: #f7f9fc;
+      color: #2c3e50;
+      align-self: flex-start;
+      border-bottom-left-radius: 4px;
+    }
+
+    .chatbot-footer {
+      padding: 15px;
+      background-color: #464646;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid #e1e8ed;
+      border-bottom-left-radius: 20px;
+    }
+
+    .chatbot-footer input {
+      flex: 1;
+      padding: 12px;
+      border: 1px solid #d1d8e0;
+      border-radius: 25px;
+      margin-right: 10px;
+      transition: all 0.3s ease;
+      outline: none;
+    }
+
+    .chatbot-footer input:focus {
+      border-color: #4a90e2;
+      box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+    }
+
+    .chatbot-footer button {
+      background-color: #4a90e2;
+      color: white;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .chatbot-footer button:hover {
+      background-color: #3a7bd5;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .graph-container {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 10px;
+      box-sizing: border-box;
+    }
+  </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Left Side: Graphs -->
+        <div class="graphs">
+          <div class="graph">
+            <div class="graph-container">
+              <canvas id="roomExpenseChart1"></canvas>
+            </div>
+          </div>
+          <div class="graph">
+            <div class="graph-container">
+              <canvas id="roomExpenseChart2"></canvas>
+            </div>
+          </div>
+          <div class="graph">
+            <div class="graph-container">
+              <canvas id="roomExpenseChart3"></canvas>
+            </div>
+          </div>
+        </div>
+    
+        <!-- Right Side: Chatbot (Previous HTML remains the same) -->
+        <div class="chatbot">
+          <div class="chatbot-header">
+            <h3>Rufus</h3>
+            <button title="Profile"><img src="https://via.placeholder.com/45" alt="Profile"></button>
+          </div>
+          <div class="chatbot-content" id="chatbotContent">
+            <div class="message bot-message">Hello! How can I assist you today?</div>
+          </div>
+          <div class="chatbot-footer">
+            <input type="text" id="chatInput" placeholder="Type a message...">
+            <button onclick="sendMessage()">Send</button>
+          </div>
+        </div>
+      </div>
+    
+<script>
+    // Function to handle sending a message
+    function sendMessage() {
+      const input = document.getElementById("chatInput");
+      const content = document.getElementById("chatbotContent");
+
+      if (input.value.trim() !== "") {
+        // Add user message
+        const userMessage = document.createElement("div");
+        userMessage.className = "message user-message";
+        userMessage.textContent = input.value;
+        content.appendChild(userMessage);
+
+        // Scroll to bottom with smooth behavior
+        content.scrollTo({
+          top: content.scrollHeight,
+          behavior: 'smooth'
+        });
+
+        // Clear input
+        input.value = "";
+
+        // Simulate bot response
+        setTimeout(() => {
+          const botMessage = document.createElement("div");
+          botMessage.className = "message bot-message";
+          botMessage.textContent = "I'm here to help!";
+          content.appendChild(botMessage);
+
+          // Scroll to bottom with smooth behavior
+          content.scrollTo({
+            top: content.scrollHeight,
+            behavior: 'smooth'
+          });
+        }, 1000);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Room Expense Chart 1
+      new Chart(document.getElementById('roomExpenseChart1'), {
+        type: 'bar',
+        data: {
+          labels: ['Bedroom', 'Living Room', 'Kitchen', 'Bathroom', 'Study'],
+          datasets: [{
+            label: 'Expense (₹)',
+            data: [5000, 3500, 2500, 1800, 2200],
+            backgroundColor: 'rgba(54, 162, 235, 0.6)',
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            title: {
+              display: true,
+              text: 'Monthly Room Expenses - Set 1'
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'Expense (₹)'
+              }
+            },
+            x: {
+              title: {
+                display: true,
+                text: 'Rooms'
+              }
+            }
+          }
+        }
+      });
+
+      // Room Expense Chart 2
+      new Chart(document.getElementById('roomExpenseChart2'), {
+        type: 'bar',
+        data: {
+          labels: ['Master Bedroom', 'Guest Room', 'Dining Area', 'Balcony', 'Hallway'],
+          datasets: [{
+            label: 'Expense (₹)',
+            data: [6000, 2800, 1900, 1200, 1500],
+            backgroundColor: 'rgba(255, 99, 132, 0.6)',
+            borderColor: 'rgba(255, 99, 132, 1)',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            title: {
+              display: true,
+              text: 'Monthly Room Expenses - Set 2'
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'Expense (₹)'
+              }
+            },
+            x: {
+              title: {
+                display: true,
+                text: 'Rooms'
+              }
+            }
+          }
+        }
+      });
+
+      // Room Expense Chart 3
+      new Chart(document.getElementById('roomExpenseChart3'), {
+        type: 'bar',
+        data: {
+          labels: ['Attic', 'Garage', 'Laundry', 'Home Office', 'Storage'],
+          datasets: [{
+            label: 'Expense (₹)',
+            data: [1700, 2300, 1500, 2800, 1000],
+            backgroundColor: 'rgba(75, 192, 192, 0.6)',
+            borderColor: 'rgba(75, 192, 192, 1)',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            title: {
+              display: true,
+              text: 'Monthly Room Expenses - Set 3'
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'Expense (₹)'
+              }
+            },
+            x: {
+              title: {
+                display: true,
+                text: 'Rooms'
+              }
+            }
+          }
+        }
+      });
+    });
+
+    // Allow sending message with Enter key
+    document.getElementById("chatInput").addEventListener("keypress", function(event) {
+      if (event.key === "Enter") {
+        sendMessage();
+      }
+    });
+  </script>
+</body>
+</html>
